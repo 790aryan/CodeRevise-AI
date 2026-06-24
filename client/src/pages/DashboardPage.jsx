@@ -1,27 +1,53 @@
-const dashboardCards = [
-  {
-    title: 'Revision Queue',
-    value: 'Ready',
-    description: 'Daily review structure is in place.',
-  },
-  {
-    title: 'Retention',
-    value: 'Pending',
-    description: 'Retention metrics will connect in a later phase.',
-  },
-  {
-    title: 'Topic Mastery',
-    value: 'Pending',
-    description: 'Topic signals will appear after tracking exists.',
-  },
-  {
-    title: 'Readiness',
-    value: 'Pending',
-    description: 'Interview readiness will be added after analytics.',
-  },
-];
+import { useEffect, useState } from 'react';
+import { getDashboardSummary, getDashboardProgress, } from '@/services/dashboard.service.js';
 
+ 
 export function DashboardPage() {
+
+    const [summary, setSummary] = useState(null);
+    const [progress, setProgress] = useState(null);
+
+  useEffect(() => {
+  async function loadDashboardData() {
+    try {
+      const [summaryData, progressData] = await Promise.all([
+        getDashboardSummary(),
+        getDashboardProgress(),
+      ]);
+
+      setSummary(summaryData);
+      setProgress(progressData);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  loadDashboardData();
+}, []);
+
+
+   const dashboardCards = [
+    {
+      title: 'Solved Problems',
+      value: summary?.solvedProblems ?? 0,
+      description: 'Problems successfully solved.',
+    },
+    {
+      title: 'Attempted Problems',
+      value: summary?.attemptedProblems ?? 0,
+      description: 'Problems tracked in the system.',
+    },
+    {
+      title: 'Active Revisions',
+      value: summary?.activeRevisions ?? 0,
+      description: 'Problems currently scheduled for revision.',
+    },
+    {
+      title: 'Due Revisions',
+      value: summary?.dueRevisions ?? 0,
+      description: 'Revisions that should be completed now.',
+    },
+  ];
   return (
     <section>
       <div className="mb-8">
@@ -49,6 +75,41 @@ export function DashboardPage() {
           </article>
         ))}
       </div>
+      <section className="mt-8">
+  <h3 className="text-2xl font-semibold mb-4">
+    Progress Overview
+  </h3>
+
+  <div className="grid gap-5 md:grid-cols-2">
+    <article className="rounded-lg border border-white/10 bg-surface p-5 shadow-soft">
+      <h4 className="text-lg font-medium mb-3">
+        Last 7 Days
+      </h4>
+
+      <p>
+        Attempts: {progress?.last7Days?.attempts ?? 0}
+      </p>
+
+      <p>
+        Revisions: {progress?.last7Days?.revisions ?? 0}
+      </p>
+    </article>
+
+    <article className="rounded-lg border border-white/10 bg-surface p-5 shadow-soft">
+      <h4 className="text-lg font-medium mb-3">
+        Last 30 Days
+      </h4>
+
+      <p>
+        Attempts: {progress?.last30Days?.attempts ?? 0}
+      </p>
+
+      <p>
+        Revisions: {progress?.last30Days?.revisions ?? 0}
+      </p>
+    </article>
+  </div>
+</section>
     </section>
   );
 }
