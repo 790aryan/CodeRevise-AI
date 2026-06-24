@@ -10,6 +10,7 @@ import { AppError, ValidationError } from '../utils/errors.js';
 import {
   generateAccessToken,
   generateRefreshToken,
+  verifyAccessToken,
   verifyRefreshToken,
 } from '../utils/jwt.utils.js';
 import { comparePassword, hashPassword } from '../utils/password.utils.js';
@@ -84,6 +85,21 @@ export function logoutUser() {
   return {
     loggedOut: true,
   };
+}
+
+export async function getCurrentUser(accessToken) {
+  const payload = verifyAccessToken(accessToken);
+
+  const user = await User.findById(payload.userId);
+
+  if (!user) {
+    throw new AppError('User was not found.', {
+      statusCode: HTTP_STATUS.UNAUTHORIZED,
+      code: 'user_not_found',
+    });
+  }
+
+  return serializeAuthUser(user);
 }
 
 function createSessionPayload(user) {

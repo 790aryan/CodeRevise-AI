@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getDashboardSummary, getDashboardProgress,  getRecentActivity, getDifficultyBreakdown,getWeakTopics,} from '@/services/dashboard.service.js';
-
+import { useAuth } from '@/context/AuthContext.jsx';
  
 export function DashboardPage() {
 
@@ -9,7 +9,9 @@ export function DashboardPage() {
     const [recentActivity, setRecentActivity] = useState([]);
     const [difficultyBreakdown, setDifficultyBreakdown] = useState(null);
     const [weakTopics, setWeakTopics] = useState([]);
-
+    const { user, setUser } = useAuth();
+    console.log('Auth User:', user);
+    
   useEffect(() => {
   async function loadDashboardData() {
     try {

@@ -2,6 +2,7 @@ import { TOKEN_TYPES } from '../constants/auth.js';
 import { config } from '../config/env.js';
 import { HTTP_STATUS } from '../constants/httpStatus.js';
 import {
+  getCurrentUser,
   loginUser,
   logoutUser,
   refreshSession,
@@ -82,6 +83,31 @@ export function logout(_request, response, next) {
     sendSuccess(response, {
       message: 'Logout completed successfully.',
       data: {},
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function me(request, response, next) {
+  try {
+    const accessToken = readCookie(
+      request,
+      getCookieName(TOKEN_TYPES.ACCESS_TOKEN),
+    );
+
+    if (!accessToken) {
+      throw new AppError('Access token cookie is required.', {
+        statusCode: HTTP_STATUS.UNAUTHORIZED,
+        code: 'missing_access_token',
+      });
+    }
+
+    const user = await getCurrentUser(accessToken);
+
+    sendSuccess(response, {
+      message: 'Current user retrieved successfully.',
+      data: { user },
     });
   } catch (error) {
     next(error);
