@@ -39,3 +39,56 @@ return {
   dueRevisions,
 };
 }
+
+
+export async function getDashboardProgress() {
+  const now = new Date();
+
+  const sevenDaysAgo = new Date(now);
+  sevenDaysAgo.setDate(now.getDate() - 7);
+
+  const thirtyDaysAgo = new Date(now);
+  thirtyDaysAgo.setDate(now.getDate() - 30);
+
+  const [
+    attemptsLast7Days,
+    revisionsLast7Days,
+    attemptsLast30Days,
+    revisionsLast30Days,
+  ] = await Promise.all([
+    ProblemAttempt.countDocuments({
+      createdAt: {
+        $gte: sevenDaysAgo,
+      },
+    }),
+
+    RevisionSession.countDocuments({
+      createdAt: {
+        $gte: sevenDaysAgo,
+      },
+    }),
+
+    ProblemAttempt.countDocuments({
+      createdAt: {
+        $gte: thirtyDaysAgo,
+      },
+    }),
+
+    RevisionSession.countDocuments({
+      createdAt: {
+        $gte: thirtyDaysAgo,
+      },
+    }),
+  ]);
+
+  return {
+    last7Days: {
+      attempts: attemptsLast7Days,
+      revisions: revisionsLast7Days,
+    },
+    last30Days: {
+      attempts: attemptsLast30Days,
+      revisions: revisionsLast30Days,
+    },
+  };
+}
