@@ -5,3 +5,9 @@ export async function getProblems() {
 
   return response.data.data.items;
 }
+
+export async function createProblem(payload) {
+  const response = await api.post('/problems', payload);
+
+  return response.data.data;
+}

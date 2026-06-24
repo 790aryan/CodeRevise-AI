@@ -8,6 +8,8 @@ import { RegisterPage } from '@/pages/RegisterPage.jsx';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute.jsx';
 import { RevisionsPage } from '@/pages/RevisionsPage.jsx';
 import ProblemsPage from '@/pages/ProblemsPage.jsx';
+import AddProblemPage from '@/pages/AddProblemPage.jsx';
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -39,6 +41,15 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ProblemsPage />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: '/problems/new',
+        element: (
+          <ProtectedRoute>
+            <AddProblemPage />
           </ProtectedRoute>
         ),
       },
