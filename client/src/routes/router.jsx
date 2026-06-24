@@ -7,6 +7,7 @@ import { LoginPage } from '@/pages/LoginPage.jsx';
 import { RegisterPage } from '@/pages/RegisterPage.jsx';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute.jsx';
 import { RevisionsPage } from '@/pages/RevisionsPage.jsx';
+import ProblemsPage from '@/pages/ProblemsPage.jsx';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -29,6 +30,15 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <RevisionsPage />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: '/problems',
+        element: (
+          <ProtectedRoute>
+            <ProblemsPage />
           </ProtectedRoute>
         ),
       },
