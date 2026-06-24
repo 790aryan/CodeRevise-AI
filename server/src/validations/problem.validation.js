@@ -56,6 +56,24 @@ const validators = {
     return undefined;
   },
 
+  optionalSlug(value, label) {
+    const normalized = normalizeOptionalString(value);
+
+    if (!normalized) {
+      return undefined;
+    }
+
+    if (normalized.length > PROBLEM_LIMITS.SLUG_MAX_LENGTH) {
+      return `${label} must be at most ${PROBLEM_LIMITS.SLUG_MAX_LENGTH} characters.`;
+    }
+
+    if (!SLUG_PATTERN.test(normalized.toLowerCase())) {
+      return `${label} must use lowercase letters, numbers, and hyphens.`;
+    }
+
+    return undefined;
+  },
+
   enumValue(value, label, allowedValues, { required = true } = {}) {
     const normalized = normalizeOptionalString(value);
 
@@ -95,6 +113,30 @@ const validators = {
 
     try {
       const url = new URL(String(value).trim());
+
+      if (!['http:', 'https:'].includes(url.protocol)) {
+        return `${label} must use HTTP or HTTPS.`;
+      }
+    } catch {
+      return `${label} must be a valid URL.`;
+    }
+
+    return undefined;
+  },
+
+  optionalUrl(value, label) {
+    const normalized = normalizeOptionalString(value);
+
+    if (!normalized) {
+      return undefined;
+    }
+
+    if (normalized.length > PROBLEM_LIMITS.PROBLEM_URL_MAX_LENGTH) {
+      return `${label} must be at most ${PROBLEM_LIMITS.PROBLEM_URL_MAX_LENGTH} characters.`;
+    }
+
+    try {
+      const url = new URL(normalized);
 
       if (!['http:', 'https:'].includes(url.protocol)) {
         return `${label} must use HTTP or HTTPS.`;
@@ -200,6 +242,54 @@ const createProblemSchema = {
   isActive: (value) => validators.boolean(value, 'Problem active flag'),
 };
 
+const updateTopicSchema = {
+  name: (value) =>
+    validators.optionalString(
+      value,
+      'Topic name',
+      PROBLEM_LIMITS.TOPIC_NAME_MAX_LENGTH,
+    ),
+  slug: (value) => validators.optionalSlug(value, 'Topic slug'),
+  description: (value) =>
+    validators.optionalString(
+      value,
+      'Topic description',
+      PROBLEM_LIMITS.TOPIC_DESCRIPTION_MAX_LENGTH,
+    ),
+  isActive: (value) => validators.boolean(value, 'Topic active flag'),
+};
+
+const updateProblemSchema = {
+  title: (value) =>
+    validators.optionalString(
+      value,
+      'Problem title',
+      PROBLEM_LIMITS.TITLE_MAX_LENGTH,
+    ),
+  slug: (value) => validators.optionalSlug(value, 'Problem slug'),
+  platform: (value) =>
+    validators.enumValue(value, 'Problem platform', Object.values(PLATFORMS), {
+      required: false,
+    }),
+  platformProblemId: (value) =>
+    validators.optionalString(
+      value,
+      'Platform problem ID',
+      PROBLEM_LIMITS.PLATFORM_PROBLEM_ID_MAX_LENGTH,
+    ),
+  problemUrl: (value) => validators.optionalUrl(value, 'Problem URL'),
+  difficulty: (value) =>
+    validators.enumValue(value, 'Problem difficulty', ALL_PROBLEM_DIFFICULTIES, {
+      required: false,
+    }),
+  topics: (value) =>
+    value === undefined
+      ? undefined
+      : validators.objectIdArray(value, 'Problem topics'),
+  isPremium: (value) => validators.boolean(value, 'Problem premium flag'),
+  isActive: (value) => validators.boolean(value, 'Problem active flag'),
+};
+
 const createProblemAttemptSchema = {
   userId: (value) => validators.objectId(value, 'User ID'),
   problemId: (value) => validators.objectId(value, 'Problem ID'),
@@ -240,8 +330,16 @@ export function validateCreateTopic(payload) {
   return validateAgainstSchema(payload, createTopicSchema);
 }
 
+export function validateUpdateTopic(payload) {
+  return validateAgainstSchema(payload, updateTopicSchema);
+}
+
 export function validateCreateProblem(payload) {
   return validateAgainstSchema(payload, createProblemSchema);
+}
+
+export function validateUpdateProblem(payload) {
+  return validateAgainstSchema(payload, updateProblemSchema);
 }
 
 export function validateCreateProblemAttempt(payload) {
