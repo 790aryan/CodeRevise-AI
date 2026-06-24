@@ -148,3 +148,53 @@ export async function getDifficultyBreakdown() {
 
   return breakdown;
 }
+
+export async function getWeakTopics() {
+  const attempts = await ProblemAttempt.find()
+    .populate({
+      path: 'problemId',
+      populate: {
+        path: 'topics',
+        select: 'name',
+      },
+    })
+    .lean();
+
+  const topicScores = {};
+
+  for (const attempt of attempts) {
+    const topics = attempt.problemId?.topics || [];
+
+    for (const topic of topics) {
+      const topicName = topic.name;
+
+      if (!topicName) {
+        continue;
+      }
+
+      if (!topicScores[topicName]) {
+        topicScores[topicName] = 0;
+      }
+
+      if (attempt.status === 'solved') {
+        topicScores[topicName] += 1;
+      }
+
+      if (attempt.status === 'needs_revision') {
+        topicScores[topicName] -= 2;
+      }
+
+      if (attempt.mistakeType) {
+        topicScores[topicName] -= 1;
+      }
+    }
+  }
+
+  return Object.entries(topicScores)
+    .map(([topic, score]) => ({
+      topic,
+      score,
+    }))
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 5);
+}

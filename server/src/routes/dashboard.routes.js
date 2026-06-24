@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getSummary,getProgress,getRecentActivityController,getDifficultyBreakdownController, } from '../controllers/dashboard.controller.js';
+import { getSummary,getProgress,getRecentActivityController,getDifficultyBreakdownController, getWeakTopicsController,} from '../controllers/dashboard.controller.js';
 
 const router = Router();
 
@@ -10,4 +10,5 @@ router.get(
   '/difficulty-breakdown',
   getDifficultyBreakdownController,
 );
+router.get('/weak-topics', getWeakTopicsController);
 export default router;
