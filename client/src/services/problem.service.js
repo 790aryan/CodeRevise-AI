@@ -11,3 +11,9 @@ export async function createProblem(payload) {
 
   return response.data.data;
 }
+
+export async function getProblemById(id) {
+  const response = await api.get(`/problems/${id}`);
+
+  return response.data.data.problem;
+}

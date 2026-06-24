@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { getProblems } from '@/services/problem.service.js';
+import { useNavigate } from 'react-router-dom';
 
 export default function ProblemsPage() {
+  const navigate = useNavigate();
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -48,9 +50,18 @@ const filteredProblems = problems.filter((problem) =>
   <p>No problems found.</p>
 ) : filteredProblems.map((problem) => (
     <div
-      key={problem._id}
-      className="w-full rounded-lg border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
-    >
+  key={problem._id}
+  onClick={() => navigate(`/problems/${problem._id}`)}
+  className="
+    rounded-lg
+    border
+    p-4
+    shadow-sm
+    cursor-pointer
+    transition
+    hover:border-cyan-500
+  "
+>
       <h2 className="text-xl font-semibold">
         {problem.title}
       </h2>
