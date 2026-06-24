@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getDashboardSummary, getDashboardProgress,  getRecentActivity,} from '@/services/dashboard.service.js';
+import { getDashboardSummary, getDashboardProgress,  getRecentActivity, getDifficultyBreakdown,getWeakTopics,} from '@/services/dashboard.service.js';
 
  
 export function DashboardPage() {
@@ -7,17 +7,21 @@ export function DashboardPage() {
     const [summary, setSummary] = useState(null);
     const [progress, setProgress] = useState(null);
     const [recentActivity, setRecentActivity] = useState([]);
+    const [difficultyBreakdown, setDifficultyBreakdown] = useState(null);
+    const [weakTopics, setWeakTopics] = useState([]);
 
   useEffect(() => {
   async function loadDashboardData() {
     try {
 
-     const [summaryData, progressData, activityData] = await Promise.all([
+     const [summaryData, progressData, activityData,difficultyData,weakTopicsData,] = await Promise.all([
 
      
         getDashboardSummary(),
         getDashboardProgress(),
         getRecentActivity(),
+        getDifficultyBreakdown(),
+        getWeakTopics(),
       ]);
 
 
@@ -25,6 +29,8 @@ export function DashboardPage() {
       setSummary(summaryData);
       setProgress(progressData);
       setRecentActivity(activityData.activities ?? []);
+      setDifficultyBreakdown(difficultyData);
+      setWeakTopics(weakTopicsData);
     } catch (error) {
       console.error(error);
     }
@@ -32,9 +38,6 @@ export function DashboardPage() {
 
   loadDashboardData();
 }, []);
-
-
-
 
    const dashboardCards = [
     {
@@ -145,6 +148,65 @@ export function DashboardPage() {
           <p className="text-sm text-text-muted mt-1">
             {new Date(activity.createdAt).toLocaleString()}
           </p>
+        </article>
+      ))
+    )}
+  </div>
+</section>
+<section className="mt-8">
+  <h3 className="text-2xl font-semibold mb-4">
+    Difficulty Breakdown
+  </h3>
+
+  <div className="grid gap-4 md:grid-cols-3">
+    <article className="rounded-lg border border-white/10 bg-surface p-5 shadow-soft">
+      <p className="text-sm text-text-muted">Easy</p>
+      <p className="mt-3 text-2xl font-semibold">
+        {difficultyBreakdown?.easy ?? 0}
+      </p>
+    </article>
+
+    <article className="rounded-lg border border-white/10 bg-surface p-5 shadow-soft">
+      <p className="text-sm text-text-muted">Medium</p>
+      <p className="mt-3 text-2xl font-semibold">
+        {difficultyBreakdown?.medium ?? 0}
+      </p>
+    </article>
+
+    <article className="rounded-lg border border-white/10 bg-surface p-5 shadow-soft">
+      <p className="text-sm text-text-muted">Hard</p>
+      <p className="mt-3 text-2xl font-semibold">
+        {difficultyBreakdown?.hard ?? 0}
+      </p>
+    </article>
+  </div>
+</section>
+
+<section className="mt-8">
+  <h3 className="text-2xl font-semibold mb-4">
+    Weak Topics
+  </h3>
+
+  <div className="space-y-3">
+    {weakTopics.length === 0 ? (
+      <p className="text-text-muted">
+        No weak topics found.
+      </p>
+    ) : (
+      weakTopics.map((topic) => (
+        <article
+          key={topic.topic}
+          className="rounded-lg border border-white/10 bg-surface p-4 shadow-soft"
+        >
+          <div className="flex items-center justify-between">
+            <p className="font-medium">
+              {topic.topic}
+            </p>
+
+            <p className="text-sm text-text-muted">
+              Score: {topic.score}
+            </p>
+          </div>
         </article>
       ))
     )}
