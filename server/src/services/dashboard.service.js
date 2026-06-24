@@ -128,3 +128,23 @@ export async function getRecentActivity() {
     activities: activities.slice(0, 20),
   };
 }
+
+export async function getDifficultyBreakdown() {
+  const attempts = await ProblemAttempt.find()
+    .populate('problemId', 'difficulty')
+    .lean();
+
+  const breakdown = {};
+
+  for (const attempt of attempts) {
+    const difficulty = attempt.problemId?.difficulty;
+
+    if (!difficulty) {
+      continue;
+    }
+
+    breakdown[difficulty] = (breakdown[difficulty] || 0) + 1;
+  }
+
+  return breakdown;
+}

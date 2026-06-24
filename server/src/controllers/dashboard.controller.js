@@ -1,4 +1,4 @@
-import { getDashboardSummary,  getDashboardProgress, getRecentActivity,} from '../services/dashboard.service.js';
+import { getDashboardSummary,  getDashboardProgress, getRecentActivity, getDifficultyBreakdown,} from '../services/dashboard.service.js';
 
 export async function getSummary(req, res, next) {
   try {
@@ -29,6 +29,23 @@ export async function getProgress(req, res, next) {
 export async function getRecentActivityController(req, res, next) {
   try {
     const result = await getRecentActivity();
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getDifficultyBreakdownController(
+  req,
+  res,
+  next,
+) {
+  try {
+    const result = await getDifficultyBreakdown();
 
     return res.status(200).json({
       success: true,
