@@ -1,21 +1,69 @@
+import { useEffect, useState } from 'react';
 import { createRevisionSession } from '@/services/revisionSession.service.js';
+import { getRevisionSchedules } from '@/services/revisionSchedule.service.js';
 
 export default function CreateRevisionSessionPage() {
+  const [schedules, setSchedules] = useState([]);
+  const [selectedScheduleId, setSelectedScheduleId] = useState('');
+
+  const [result, setResult] = useState('good');
+  const [durationMinutes, setDurationMinutes] = useState(0);
+  const [notes, setNotes] = useState('');
+
+  const [creating, setCreating] = useState(false);
+
+  useEffect(() => {
+    async function loadSchedules() {
+      try {
+        const data = await getRevisionSchedules();
+
+        console.log('Revision Schedules:', data);
+
+        setSchedules(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadSchedules();
+  }, []);
+
+  const selectedSchedule = schedules.find(
+    (schedule) => schedule._id === selectedScheduleId,
+  );
+
   async function handleCreateSession() {
+    if (!selectedSchedule) {
+      alert('Please select a revision schedule.');
+      return;
+    }
+
     try {
-      const result = await createRevisionSession({
-        userId: '6a3bc874736fe75234e8b425',
-        problemId: '6a3bf6c1ccb082c1b2f302c0',
-        revisionScheduleId: '6a3bf93b56dc28b9bd3a54c4',
+      setCreating(true);
 
-        result: 'good',
-
+      const resultData = await createRevisionSession({
+        userId: selectedSchedule.userId._id,
+        problemId: selectedSchedule.problemId._id,
+        revisionScheduleId: selectedSchedule._id,
+        result,
+        durationMinutes,
+        notes,
         completedAt: new Date().toISOString(),
       });
 
-      console.log('Created Revision Session:', result);
+      console.log('Created Revision Session:', resultData);
+
+      alert('Revision session created successfully!');
+
+      setSelectedScheduleId('');
+      setResult('good');
+      setDurationMinutes(0);
+      setNotes('');
     } catch (error) {
       console.error(error);
+      alert('Failed to create revision session.');
+    } finally {
+      setCreating(false);
     }
   }
 
@@ -25,12 +73,136 @@ export default function CreateRevisionSessionPage() {
         Create Revision Session
       </h1>
 
-      <button
-        onClick={handleCreateSession}
-        className="rounded-lg border px-4 py-2"
-      >
-        Create Test Session
-      </button>
+      <div className="space-y-4">
+        <select
+          value={selectedScheduleId}
+          onChange={(e) => setSelectedScheduleId(e.target.value)}
+          className="
+            w-full
+            rounded-lg
+            border
+            px-4
+            py-3
+            bg-slate-800
+            text-white
+            focus:outline-none
+            focus:ring-2
+            focus:ring-cyan-500
+          "
+        >
+          <option value="">
+            Select Revision Schedule
+          </option>
+
+          {schedules.map((schedule) => (
+            <option
+              key={schedule._id}
+              value={schedule._id}
+            >
+              {schedule.problemId.title}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={result}
+          onChange={(e) => setResult(e.target.value)}
+          className="
+            w-full
+            rounded-lg
+            border
+            px-4
+            py-3
+            bg-slate-800
+            text-white
+            focus:outline-none
+            focus:ring-2
+            focus:ring-cyan-500
+          "
+        >
+          <option value="easy">
+            Easy
+          </option>
+
+          <option value="good">
+            Good
+          </option>
+
+          <option value="hard">
+            Hard
+          </option>
+
+          <option value="again">
+            Again
+          </option>
+        </select>
+
+        <input
+          type="number"
+          min="0"
+          value={durationMinutes}
+          onChange={(e) =>
+            setDurationMinutes(Number(e.target.value))
+          }
+          placeholder="Duration (minutes)"
+          className="
+            w-full
+            rounded-lg
+            border
+            px-4
+            py-3
+            bg-slate-800
+            text-white
+            focus:outline-none
+            focus:ring-2
+            focus:ring-cyan-500
+          "
+        />
+
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Notes"
+          rows={4}
+          className="
+            w-full
+            rounded-lg
+            border
+            px-4
+            py-3
+            bg-slate-800
+            text-white
+            focus:outline-none
+            focus:ring-2
+            focus:ring-cyan-500
+          "
+        />
+
+        <button
+          onClick={handleCreateSession}
+          disabled={!selectedScheduleId || creating}
+          className="
+            w-full
+            rounded-lg
+            border
+            px-4
+            py-3
+            bg-slate-800
+            text-white
+            transition
+            hover:bg-slate-700
+            disabled:opacity-50
+            disabled:cursor-not-allowed
+            focus:outline-none
+            focus:ring-2
+            focus:ring-cyan-500
+          "
+        >
+          {creating
+            ? 'Creating...'
+            : 'Create Revision Session'}
+        </button>
+      </div>
     </div>
   );
 }
