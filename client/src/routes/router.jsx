@@ -6,6 +6,7 @@ import { NotFoundPage } from '@/pages/NotFoundPage.jsx';
 import { LoginPage } from '@/pages/LoginPage.jsx';
 import { RegisterPage } from '@/pages/RegisterPage.jsx';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute.jsx';
+import { RevisionsPage } from '@/pages/RevisionsPage.jsx';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -22,6 +23,15 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
+      {
+      path: '/revisions',
+        element: (
+          <ProtectedRoute>
+            <RevisionsPage />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 
@@ -33,6 +43,7 @@ export const router = createBrowserRouter([
     path: '/register',
     element: <RegisterPage />,
   },
+  
 
   {
     path: '/not-found',
