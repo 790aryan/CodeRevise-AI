@@ -1,22 +1,30 @@
 import { useEffect, useState } from 'react';
-import { getDashboardSummary, getDashboardProgress, } from '@/services/dashboard.service.js';
+import { getDashboardSummary, getDashboardProgress,  getRecentActivity,} from '@/services/dashboard.service.js';
 
  
 export function DashboardPage() {
 
     const [summary, setSummary] = useState(null);
     const [progress, setProgress] = useState(null);
+    const [recentActivity, setRecentActivity] = useState([]);
 
   useEffect(() => {
   async function loadDashboardData() {
     try {
-      const [summaryData, progressData] = await Promise.all([
+
+     const [summaryData, progressData, activityData] = await Promise.all([
+
+     
         getDashboardSummary(),
         getDashboardProgress(),
+        getRecentActivity(),
       ]);
+
+
 
       setSummary(summaryData);
       setProgress(progressData);
+      setRecentActivity(activityData.activities ?? []);
     } catch (error) {
       console.error(error);
     }
@@ -24,6 +32,8 @@ export function DashboardPage() {
 
   loadDashboardData();
 }, []);
+
+
 
 
    const dashboardCards = [
@@ -108,6 +118,36 @@ export function DashboardPage() {
         Revisions: {progress?.last30Days?.revisions ?? 0}
       </p>
     </article>
+  </div>
+</section>
+<section className="mt-8">
+  <h3 className="text-2xl font-semibold mb-4">
+    Recent Activity
+  </h3>
+
+  <div className="space-y-3">
+    {recentActivity.length === 0 ? (
+      <p className="text-text-muted">
+        No recent activity found.
+      </p>
+    ) : (
+      recentActivity.map((activity) => (
+        <article
+          key={activity.id}
+          className="rounded-lg border border-white/10 bg-surface p-4 shadow-soft"
+        >
+          <p className="font-medium">
+            {activity.type === 'problem_attempt'
+              ? 'Problem Attempt'
+              : activity.type}
+          </p>
+
+          <p className="text-sm text-text-muted mt-1">
+            {new Date(activity.createdAt).toLocaleString()}
+          </p>
+        </article>
+      ))
+    )}
   </div>
 </section>
     </section>

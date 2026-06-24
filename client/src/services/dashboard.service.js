@@ -10,3 +10,8 @@ export async function getDashboardProgress() {
   const response = await api.get('/dashboard/progress');
   return response.data.data;
 }
+
+export async function getRecentActivity() {
+  const response = await api.get('/dashboard/recent-activity');
+  return response.data.data;
+}
