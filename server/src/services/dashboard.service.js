@@ -92,3 +92,39 @@ export async function getDashboardProgress() {
     },
   };
 }
+
+export async function getRecentActivity() {
+  const problemAttempts = await ProblemAttempt.find()
+    .sort({ createdAt: -1 })
+    .limit(10)
+    .lean();
+
+  const revisionSessions = await RevisionSession.find()
+    .sort({ createdAt: -1 })
+    .limit(10)
+    .lean();
+
+  const activities = [
+    ...problemAttempts.map((attempt) => ({
+      type: 'problem_attempt',
+      id: attempt._id,
+      problemId: attempt.problemId,
+      createdAt: attempt.createdAt,
+    })),
+
+    ...revisionSessions.map((session) => ({
+      type: 'revision_session',
+      id: session._id,
+      problemId: session.problemId,
+      createdAt: session.createdAt,
+    })),
+  ];
+
+  activities.sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+  );
+
+  return {
+    activities: activities.slice(0, 20),
+  };
+}
