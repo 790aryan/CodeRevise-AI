@@ -10,7 +10,8 @@ import { RevisionsPage } from '@/pages/RevisionsPage.jsx';
 import ProblemsPage from '@/pages/ProblemsPage.jsx';
 import AddProblemPage from '@/pages/AddProblemPage.jsx';
 import ProblemDetailPage from '@/pages/ProblemDetailPage.jsx';
-
+import RevisionSessionsPage from '@/pages/RevisionSessionsPage.jsx';
+import CreateRevisionSessionPage from '@/pages/CreateRevisionSessionPage.jsx';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -62,7 +63,23 @@ export const router = createBrowserRouter([
         ),
       },
 
-      
+      {
+        path: '/revision-sessions',
+        element: (
+          <ProtectedRoute>
+            <RevisionSessionsPage />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: '/revision-sessions/new',
+        element: (
+          <ProtectedRoute>
+            <CreateRevisionSessionPage />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 

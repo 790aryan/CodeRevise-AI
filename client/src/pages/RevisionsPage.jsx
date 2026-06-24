@@ -9,13 +9,23 @@ export function RevisionsPage() {
   async function loadRevisions() {
     try {
       const data = await getRevisionSchedules();
-
+      console.log('Revision Schedules:', data);
       setRevisions(data);
 
       
     } catch (error) {
-      console.error(error);
-    }
+  console.log('FULL ERROR:', error);
+
+  console.log(
+    'BACKEND RESPONSE:',
+    error.response?.data
+  );
+
+  console.log(
+    'VALIDATION DETAILS:',
+    error.response?.data?.error?.details
+  );
+}
   }
 
   loadRevisions();
