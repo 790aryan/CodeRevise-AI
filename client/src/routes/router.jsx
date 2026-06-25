@@ -13,6 +13,8 @@ import ProblemDetailPage from '@/pages/ProblemDetailPage.jsx';
 import RevisionSessionsPage from '@/pages/RevisionSessionsPage.jsx';
 import CreateRevisionSessionPage from '@/pages/CreateRevisionSessionPage.jsx';
 import DueTodayPage from '@/pages/DueTodayPage.jsx';
+import EditProblemPage from '@/pages/EditProblemPage.jsx';
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -54,6 +56,10 @@ export const router = createBrowserRouter([
             <ProblemDetailPage />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: '/problems/:id/edit',
+        element: <EditProblemPage />,
       },
       {
         path: '/problems/new',

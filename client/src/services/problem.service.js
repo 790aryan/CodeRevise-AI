@@ -17,3 +17,12 @@ export async function getProblemById(id) {
 
   return response.data.data.problem;
 }
+
+export async function updateProblem(id, payload) {
+  const response = await api.patch(
+    `/problems/${id}`,
+    payload,
+  );
+
+  return response.data.data.problem;
+}
