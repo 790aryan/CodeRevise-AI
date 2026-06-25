@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getRevisionSchedules } from '@/services/revision.service.js';
 
 
-export function RevisionsPage() {
+export default function RevisionSchedulesPage() {
     const [revisions, setRevisions] = useState([]);
    
     useEffect(() => {

@@ -108,6 +108,17 @@ export async function deleteRevisionSchedule(revisionScheduleId) {
 
 function createRevisionScheduleFilter(query) {
   const filter = {};
+  if (query.dueToday === 'true') {
+    filter.isActive = true;
+
+    const endOfToday = new Date();
+
+    endOfToday.setHours(23, 59, 59, 999);
+
+    filter.nextRevisionAt = {
+      $lte: endOfToday,
+    };
+  }
 
   if (query.userId) {
     assertObjectId(query.userId, 'User ID');

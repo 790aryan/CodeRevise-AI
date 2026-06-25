@@ -6,12 +6,13 @@ import { NotFoundPage } from '@/pages/NotFoundPage.jsx';
 import { LoginPage } from '@/pages/LoginPage.jsx';
 import { RegisterPage } from '@/pages/RegisterPage.jsx';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute.jsx';
-import { RevisionsPage } from '@/pages/RevisionsPage.jsx';
+import RevisionSchedulesPage from '@/pages/RevisionSchedulesPage.jsx';
 import ProblemsPage from '@/pages/ProblemsPage.jsx';
 import AddProblemPage from '@/pages/AddProblemPage.jsx';
 import ProblemDetailPage from '@/pages/ProblemDetailPage.jsx';
 import RevisionSessionsPage from '@/pages/RevisionSessionsPage.jsx';
 import CreateRevisionSessionPage from '@/pages/CreateRevisionSessionPage.jsx';
+import DueTodayPage from '@/pages/DueTodayPage.jsx';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -33,7 +34,7 @@ export const router = createBrowserRouter([
       path: '/revisions',
         element: (
           <ProtectedRoute>
-            <RevisionsPage />
+            <RevisionSchedulesPage />
           </ProtectedRoute>
         ),
       },
@@ -77,6 +78,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <CreateRevisionSessionPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/due-today',
+        element: (
+          <ProtectedRoute>
+            <DueTodayPage />
           </ProtectedRoute>
         ),
       },

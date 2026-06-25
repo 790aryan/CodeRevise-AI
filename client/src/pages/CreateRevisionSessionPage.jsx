@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { createRevisionSession } from '@/services/revisionSession.service.js';
 import { getRevisionSchedules } from '@/services/revisionSchedule.service.js';
+import { updateRevisionSchedule } from '@/services/revisionSchedule.service.js';
+import { calculateNextRevision } from '@/utils/revision.js';
 
 export default function CreateRevisionSessionPage() {
   const [schedules, setSchedules] = useState([]);
@@ -55,6 +57,42 @@ export default function CreateRevisionSessionPage() {
 
       alert('Revision session created successfully!');
 
+      const nextRevision =
+        calculateNextRevision(result);
+
+        console.log(
+        'Next Revision:',
+        nextRevision,
+        );
+        await updateRevisionSchedule(
+  selectedSchedule._id,
+  {
+    status: 'scheduled',
+
+    currentIntervalDays:
+      nextRevision.currentIntervalDays,
+
+    nextRevisionAt:
+      nextRevision.nextRevisionAt,
+
+    lastRevisionAt:
+      new Date().toISOString(),
+
+    revisionCount:
+      selectedSchedule.revisionCount + 1,
+
+    successfulRevisionCount:
+      result === 'again'
+        ? selectedSchedule.successfulRevisionCount
+        : selectedSchedule.successfulRevisionCount + 1,
+
+    lastRevisionResult: result,
+  },
+);
+
+console.log(
+  'Revision schedule updated successfully.',
+);
       setSelectedScheduleId('');
       setResult('good');
       setDurationMinutes(0);
