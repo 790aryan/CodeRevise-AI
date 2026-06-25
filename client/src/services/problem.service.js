@@ -26,3 +26,11 @@ export async function updateProblem(id, payload) {
 
   return response.data.data.problem;
 }
+
+export async function deleteProblem(id) {
+  const response = await api.delete(
+    `/problems/${id}`,
+  );
+
+  return response.data.data.problem;
+}
