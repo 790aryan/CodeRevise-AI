@@ -26,6 +26,18 @@ app.use(
   revisionEngineRoutes,
 );
 app.use('/api/v1', apiV1Router);
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "CodeRevise AI API is running 🚀",
+  });
+});
 
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: "healthy",
+  });
+});
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
