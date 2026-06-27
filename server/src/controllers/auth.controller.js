@@ -91,23 +91,11 @@ export function logout(_request, response, next) {
 
 export async function me(request, response, next) {
   try {
-    const accessToken = readCookie(
-      request,
-      getCookieName(TOKEN_TYPES.ACCESS_TOKEN),
-    );
-
-    if (!accessToken) {
-      throw new AppError('Access token cookie is required.', {
-        statusCode: HTTP_STATUS.UNAUTHORIZED,
-        code: 'missing_access_token',
-      });
-    }
-
-    const user = await getCurrentUser(accessToken);
-
     sendSuccess(response, {
       message: 'Current user retrieved successfully.',
-      data: { user },
+      data: {
+        user: request.user,
+      },
     });
   } catch (error) {
     next(error);

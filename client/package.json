@@ -15,8 +15,9 @@
     "lucide-react": "^1.21.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.6.2",
-    "recharts": "^2.15.3",
+    "recharts": "^2.15.4",
     "vite": "^7.0.0"
   },
   "devDependencies": {

@@ -1,24 +1,33 @@
 import { ProblemAttempt } from '../models/ProblemAttempt.model.js';
 import { RevisionSchedule } from '../models/RevisionSchedule.model.js';
 import { RevisionSession } from '../models/RevisionSession.model.js';
+import { getMemoryAnalytics } from './memory/analytics/memoryAnalytics.service.js';
+import { UserProblemStats } from '../models/UserProblemStats.model.js';
 
 export async function getDashboardSummary() {
-  const [
-    solvedProblems,
-    attemptedProblems,
-    revisionSchedules,
-    completedRevisions,
-  ] = await Promise.all([
-    ProblemAttempt.countDocuments({
-      status: 'solved',
-    }),
+const [
+  solvedProblems,
+  attemptedProblems,
+  revisionSchedules,
+  completedRevisions,
+  bestMemory,
+] = await Promise.all([
+  ProblemAttempt.countDocuments({
+    status: 'solved',
+  }),
 
-    ProblemAttempt.countDocuments(),
+  ProblemAttempt.countDocuments(),
 
-    RevisionSchedule.countDocuments(),
+  RevisionSchedule.countDocuments(),
 
-    RevisionSession.countDocuments(),
-  ]);
+  RevisionSession.countDocuments(),
+
+  UserProblemStats.findOne()
+    .sort({
+      stability: -1,
+    })
+    .lean(),
+]);
 
   const activeRevisions = await RevisionSchedule.countDocuments({
   isActive: true,
@@ -29,7 +38,18 @@ const dueRevisions = await RevisionSchedule.countDocuments({
     $lte: new Date(),
   },
 });
+const memoryAnalytics =
+  getMemoryAnalytics({
+    memoryState: {
+      strength:
+        bestMemory?.memoryStrength ?? 1,
 
+      stability:
+        bestMemory?.stability ?? 3,
+
+      retrievability: 100,
+    },
+  });
 return {
   solvedProblems,
   attemptedProblems,
@@ -37,18 +57,54 @@ return {
   completedRevisions,
   activeRevisions,
   dueRevisions,
+  memoryAnalytics,
 };
 }
 
 
 export async function getDashboardProgress() {
-  const now = new Date();
+  const today = new Date();
 
-  const sevenDaysAgo = new Date(now);
-  sevenDaysAgo.setDate(now.getDate() - 7);
+  const dailyActivity = [];
 
-  const thirtyDaysAgo = new Date(now);
-  thirtyDaysAgo.setDate(now.getDate() - 30);
+  for (let i = 6; i >= 0; i--) {
+    const start = new Date(today);
+    start.setHours(0, 0, 0, 0);
+    start.setDate(today.getDate() - i);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 1);
+
+    const [attempts, revisions] = await Promise.all([
+      ProblemAttempt.countDocuments({
+        createdAt: {
+          $gte: start,
+          $lt: end,
+        },
+      }),
+
+      RevisionSession.countDocuments({
+        createdAt: {
+          $gte: start,
+          $lt: end,
+        },
+      }),
+    ]);
+
+    dailyActivity.push({
+      day: start.toLocaleDateString('en-US', {
+        weekday: 'short',
+      }),
+      attempts,
+      revisions,
+    });
+  }
+
+  const sevenDaysAgo = new Date(today);
+  sevenDaysAgo.setDate(today.getDate() - 7);
+
+  const thirtyDaysAgo = new Date(today);
+  thirtyDaysAgo.setDate(today.getDate() - 30);
 
   const [
     attemptsLast7Days,
@@ -86,13 +142,15 @@ export async function getDashboardProgress() {
       attempts: attemptsLast7Days,
       revisions: revisionsLast7Days,
     },
+
     last30Days: {
       attempts: attemptsLast30Days,
       revisions: revisionsLast30Days,
     },
+
+    dailyActivity,
   };
 }
-
 export async function getRecentActivity() {
   const problemAttempts = await ProblemAttempt.find()
     .sort({ createdAt: -1 })
@@ -197,4 +255,78 @@ export async function getWeakTopics() {
     }))
     .sort((a, b) => a.score - b.score)
     .slice(0, 5);
+}
+
+export async function getPlatformDistribution() {
+  const attempts = await ProblemAttempt.find()
+    .populate('problemId', 'platform')
+    .lean();
+
+  const platforms = {};
+
+  for (const attempt of attempts) {
+    const platform =
+      attempt.problemId?.platform ?? 'Unknown';
+
+    platforms[platform] =
+      (platforms[platform] ?? 0) + 1;
+  }
+
+  return Object.entries(platforms).map(
+    ([platform, count]) => ({
+      platform,
+      count,
+    }),
+  );
+}
+
+export async function getCurrentStreak() {
+  const attempts = await ProblemAttempt.find(
+    {},
+    'createdAt',
+  ).lean();
+
+  const revisions = await RevisionSession.find(
+    {},
+    'createdAt',
+  ).lean();
+
+  const activityDates = new Set();
+
+  [...attempts, ...revisions].forEach((item) => {
+    const date = new Date(item.createdAt);
+
+    date.setHours(0, 0, 0, 0);
+
+    activityDates.add(date.getTime());
+  });
+
+  let streak = 0;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  while (activityDates.has(today.getTime())) {
+    streak++;
+
+    today.setDate(today.getDate() - 1);
+  }
+
+  return streak;
+}
+
+export async function getAccuracy() {
+  const totalAttempts = await ProblemAttempt.countDocuments();
+
+  const solvedAttempts = await ProblemAttempt.countDocuments({
+    status: 'solved',
+  });
+
+  if (totalAttempts === 0) {
+    return 0;
+  }
+
+  return Math.round(
+    (solvedAttempts / totalAttempts) * 100,
+  );
 }

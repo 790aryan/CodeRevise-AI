@@ -3,162 +3,99 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { APP_NAME, NAV_ITEMS } from '@/constants/app.js';
 import { useAuth } from '@/context/AuthContext.jsx';
 import { logoutUser } from '@/services/auth.service.js';
+import { LogOut, Plus, UserCircle, ChevronRight } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function Sidebar() {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
-  const [showLogoutModal, setShowLogoutModal] =
-  useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   async function handleLogout() {
-  try {
-    await logoutUser();
-
-    setShowLogoutModal(false);
-
-    setUser(null);
-
-    navigate('/login');
-  } catch (error) {
-    console.error(error);
-
-    alert('Logout failed.');
+    try {
+      await logoutUser();
+      setUser(null);
+      navigate('/login');
+    } catch (error) {
+      toast.error('Logout failed.');
+    } finally {
+      setShowLogoutModal(false);
+    }
   }
-}
 
   return (
-    <aside className="hidden w-72 border-r border-white/10 bg-surface/80 lg:flex lg:flex-col">
-      <div className="border-b border-white/10 p-6">
-        <h1 className="text-2xl font-bold">
+    <aside className="hidden w-72 border-r border-white/10 bg-surface lg:flex lg:flex-col">
+      {/* Brand & User Profile */}
+      <div className="p-6 border-b border-white/5">
+        <h1 className="text-xl font-bold tracking-tight text-white mb-6 flex items-center gap-2">
+          <div className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center font-black text-background">C</div>
           {APP_NAME}
         </h1>
 
-        <div className="mt-6 rounded-lg border border-white/10 bg-background/40 p-4">
-          <p className="text-xs uppercase tracking-wider text-text-muted">
-            Signed in as
-          </p>
-
-          <h2 className="mt-2 font-semibold">
-            {user?.name ?? 'Guest'}
-          </h2>
-
-          <p className="text-sm text-text-muted">
-            {user?.email ?? 'No email'}
-          </p>
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+          <UserCircle className="h-10 w-10 text-gray-500" />
+          <div className="overflow-hidden">
+            <p className="font-semibold text-sm truncate">{user?.name ?? 'Guest User'}</p>
+            <p className="text-xs text-gray-400 truncate">{user?.email ?? '---'}</p>
+          </div>
         </div>
       </div>
 
-      <nav className="flex-1 space-y-2 p-6">
-{NAV_ITEMS.map((item) => {
-  const Icon = item.icon;
+      {/* Primary Navigation */}
+      <nav className="flex-1 space-y-1 p-4">
+        {NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.href}
+              to={item.href}
+              end={item.href === '/'}
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                  isActive 
+                    ? 'bg-accent text-white shadow-lg shadow-accent/20' 
+                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                }`
+              }
+            >
+              <Icon size={18} />
+              {item.label}
+            </NavLink>
+          );
+        })}
+      </nav>
 
-  return (
-    <NavLink
-      key={item.href}
-      to={item.href}
-      end={item.href === '/problems'}
-      className={({ isActive }) =>
-        `
-        flex
-        items-center
-        gap-3
-        rounded-lg
-        px-4
-        py-3
-        font-medium
-        transition-all
-        ${
-  isActive
-  ? `
-      bg-accent
-      text-background
-      font-semibold
-      shadow-lg
-    `
-  : `
-      text-text-muted
-      hover:bg-white/10
-      hover:text-white
-    `
-        }
-        `
-      }
-    >
-      <Icon size={20} />
+      {/* Quick Actions */}
+      <div className="p-4 border-t border-white/5 space-y-2">
+        <button
+          onClick={() => navigate('/revision-sessions/new')}
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/5 py-3 text-sm font-semibold text-white border border-white/10 hover:bg-white/10 transition"
+        >
+          <Plus size={16} /> New Revision Session
+        </button>
+        
+        <button
+          onClick={() => setShowLogoutModal(true)}
+          className="flex w-full items-center justify-between px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 rounded-xl transition"
+        >
+          <span>Logout</span>
+          <LogOut size={16} />
+        </button>
+      </div>
 
-      <span>{item.label}</span>
-    </NavLink>
-  );
-})}
-            </nav>
-
-      <div className="border-t border-white/10 p-6">
-  <button
-    onClick={() => setShowLogoutModal(true)}
-    className="
-      w-full
-      rounded-lg
-      border
-      border-red-500/30
-      py-3
-      text-red-400
-      transition
-      hover:bg-red-500/10
-    "
-  >
-    Logout
-  </button>
-            </div>
-
+      {/* Logout Modal */}
       {showLogoutModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-xl border border-white/10 bg-surface p-6 shadow-2xl">
-
-            <h2 className="text-xl font-semibold">
-              Logout
-            </h2>
-
-            <p className="mt-3 text-text-muted">
-              Are you sure you want to logout?
-            </p>
-
-            <div className="mt-8 flex justify-end gap-3">
-
-              <button
-                onClick={() => setShowLogoutModal(false)}
-                className="
-                  rounded-lg
-                  border
-                  border-white/10
-                  px-5
-                  py-2
-                  hover:bg-white/10
-                "
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={handleLogout}
-                className="
-                  rounded-lg
-                  bg-red-500
-                  px-5
-                  py-2
-                  font-medium
-                  text-white
-                  hover:bg-red-600
-                "
-              >
-                Logout
-              </button>
-
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-surface p-6 shadow-2xl">
+            <h2 className="text-lg font-bold">Confirm Logout</h2>
+            <p className="mt-2 text-sm text-gray-400">You will need to sign in again to access your workspace.</p>
+            <div className="mt-6 flex gap-3">
+              <button onClick={() => setShowLogoutModal(false)} className="flex-1 py-2.5 rounded-xl border border-white/10 font-medium">Cancel</button>
+              <button onClick={handleLogout} className="flex-1 py-2.5 rounded-xl bg-red-500 font-medium text-white hover:bg-red-600">Logout</button>
             </div>
-
           </div>
         </div>
       )}
-
     </aside>
   );
 }

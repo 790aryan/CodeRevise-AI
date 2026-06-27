@@ -2,94 +2,96 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '@/services/auth.service.js';
 import { useAuth } from '@/context/AuthContext.jsx';
+import { Loader2, Mail, Lock, AlertCircle } from 'lucide-react';
 
 export function LoginPage() {
-    const navigate = useNavigate();
-    const { setUser } = useAuth();
+  const navigate = useNavigate();
+  const { setUser } = useAuth();
 
-    const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    });
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-    function handleChange(event) {
+  function handleChange(event) {
     const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }
 
-    setFormData((previous) => ({
-        ...previous,
-        [name]: value,
-    }));
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await loginUser(formData);
+      setUser(response.data.user);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid email or password.');
+      setLoading(false);
     }
+  }
 
-    async function handleSubmit(event) {
-        event.preventDefault();
-
-        try {
-            const response = await loginUser(formData);
-
-           console.log(
-            'Login Success:',
-            JSON.stringify(response, null, 2)
-            );
-
-            setUser(response.data.user);
-
-            navigate('/dashboard');
-        } catch (error) {
-            console.error(
-            'Login Error:',
-            error.response?.data || error
-            );
-        }
-        }
   return (
-    <section className="mx-auto flex min-h-screen max-w-md items-center px-6">
-      <div className="w-full rounded-lg border border-white/10 bg-surface p-6 shadow-soft">
-        <h1 className="text-3xl font-semibold">Login</h1>
-
-        <p className="mt-2 text-text-muted">
-          Sign in to your CodeRevise AI account.
+    <section className="flex min-h-screen items-center justify-center px-6">
+      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-surface p-8 shadow-2xl">
+        <h1 className="text-3xl font-bold tracking-tight">Login</h1>
+        <p className="mt-2 text-sm text-text-muted">
+          Welcome back to CodeRevise AI.
         </p>
 
-        <form
-        className="mt-6 space-y-4"
-        onSubmit={handleSubmit}
-        >
-          <div>
-            <label className="mb-2 block text-sm">
-              Email
-            </label>
+        {error && (
+          <div className="mt-6 flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            {error}
+          </div>
+        )}
 
-            <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Enter your email"
-            className="w-full rounded-lg border border-white/10 bg-transparent px-4 py-3"
-            />
+        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+          {/* Email Field */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">Email</label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-3.5 h-4 w-4 text-gray-500" />
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="name@company.com"
+                className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 outline-none transition-all focus:border-accent focus:ring-1 focus:ring-accent"
+                required
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="mb-2 block text-sm">
-              Password
-            </label>
-
-           <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter your password"
-            className="w-full rounded-lg border border-white/10 bg-transparent px-4 py-3"
-            />
+          {/* Password Field */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">Password</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-3.5 h-4 w-4 text-gray-500" />
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 outline-none transition-all focus:border-accent focus:ring-1 focus:ring-accent"
+                required
+              />
+            </div>
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-accent px-4 py-3 font-medium"
+            disabled={loading}
+            className="flex w-full cursor-pointer items-center justify-center rounded-xl bg-accent py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            Login
+            {loading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              'Login'
+            )}
           </button>
         </form>
       </div>

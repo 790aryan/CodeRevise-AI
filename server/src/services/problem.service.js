@@ -171,3 +171,12 @@ function assertObjectId(value, label) {
     });
   }
 }
+
+
+export async function checkProblemExists(platform, platformProblemId) {
+  return Problem.findOne({
+    platform,
+    platformProblemId,
+  }).select('_id title platform platformProblemId');
+}
+

@@ -11,9 +11,11 @@ import ProblemsPage from '@/pages/ProblemsPage.jsx';
 import AddProblemPage from '@/pages/AddProblemPage.jsx';
 import ProblemDetailPage from '@/pages/ProblemDetailPage.jsx';
 import RevisionSessionsPage from '@/pages/RevisionSessionsPage.jsx';
-import CreateRevisionSessionPage from '@/pages/CreateRevisionSessionPage.jsx';
+import MemorySessionPage from '@/pages/MemorySessionPage.jsx';
 import DueTodayPage from '@/pages/DueTodayPage.jsx';
 import EditProblemPage from '@/pages/EditProblemPage.jsx';
+import ProblemAnalyticsPage from '@/pages/ProblemAnalyticsPage';
+import MemorySimulatorPage from '@/pages/MemorySimulatorPage';
 
 export const router = createBrowserRouter([
   {
@@ -83,10 +85,26 @@ export const router = createBrowserRouter([
         path: '/revision-sessions/new',
         element: (
           <ProtectedRoute>
-            <CreateRevisionSessionPage />
+            <MemorySessionPage />
           </ProtectedRoute>
         ),
       },
+      {
+  path: '/problem-analytics/:problemId',
+  element: (
+    <ProtectedRoute>
+      <ProblemAnalyticsPage />
+    </ProtectedRoute>
+  ),
+},
+{
+  path: '/memory-simulator',
+  element: (
+    <ProtectedRoute>
+      <MemorySimulatorPage />
+    </ProtectedRoute>
+  ),
+},
       {
         path: '/due-today',
         element: (
@@ -95,6 +113,7 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
     ],
   },
 

@@ -5,9 +5,10 @@ import {
   getProblemById,
   listProblems,
   updateProblem,
+  checkProblemExists,
 } from '../services/problem.service.js';
 import { sendSuccess } from '../utils/apiResponse.js';
-
+import { fetchProblemMetadata } from '../services/metadata/metadata.service.js';
 export async function createProblemController(request, response, next) {
   try {
     const problem = await createProblem(request.body);
@@ -68,6 +69,44 @@ export async function deleteProblemController(request, response, next) {
     sendSuccess(response, {
       message: 'Problem deleted successfully.',
       data: { problem },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function fetchProblemDetailsController(
+  request,
+  response,
+  next
+) {
+  try {
+    const data = await fetchProblemMetadata(request.body.url);
+
+    sendSuccess(response, {
+      message: 'Problem details fetched successfully.',
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function checkProblemExistsController(request, response, next) {
+  try {
+    const { platform, platformProblemId } = request.query;
+
+    const problem = await checkProblemExists(
+      platform,
+      platformProblemId
+    );
+
+    sendSuccess(response, {
+      message: 'Duplicate check completed.',
+      data: {
+        exists: !!problem,
+        problem,
+      },
     });
   } catch (error) {
     next(error);

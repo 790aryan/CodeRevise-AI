@@ -1,90 +1,121 @@
 import mongoose from 'mongoose';
 import {
-  REVISION_LIMITS,
+  ATTEMPT_TYPES,
+  CONFIDENCE_LIMITS,
+  HINT_LEVELS,
   REVISION_RESULTS,
-  SESSION_TYPES,
-} from '../constants/revision.js';
+} from '../constants/revision.constants.js';
 
 const { Schema } = mongoose;
 
 const revisionSessionSchema = new Schema(
   {
-    userId: {
+    user: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'User ID is required.'],
+      required: [true, 'User is required.'],
+      
     },
-    problemId: {
+
+    problem: {
       type: Schema.Types.ObjectId,
       ref: 'Problem',
-      required: [true, 'Problem ID is required.'],
+      required: [true, 'Problem is required.'],
+      
     },
-    revisionScheduleId: {
-      type: Schema.Types.ObjectId,
-      ref: 'RevisionSchedule',
-      required: [true, 'Revision schedule ID is required.'],
-    },
-    sessionType: {
-      type: String,
-      required: [true, 'Revision session type is required.'],
-      enum: {
-        values: Object.values(SESSION_TYPES),
-        message: 'Revision session type is not supported.',
-      },
-      default: SESSION_TYPES.SCHEDULED,
-    },
-    result: {
-      type: String,
-      required: [true, 'Revision result is required.'],
-      enum: {
-        values: Object.values(REVISION_RESULTS),
-        message: 'Revision result is not supported.',
-      },
-    },
-    durationMinutes: {
-      type: Number,
-      default: 0,
-      min: [0, 'Revision duration cannot be negative.'],
-    },
+
+sessionNumber: {
+  type: Number,
+  required: [true, 'Session number is required.'],
+  min: [1, 'Session number must be at least 1.'],
+},
+
+result: {
+  type: String,
+  required: [true, 'Revision result is required.'],
+  enum: {
+    values: Object.values(REVISION_RESULTS),
+    message: 'Invalid revision result.',
+  },
+},
+
+confidence: {
+  type: Number,
+  required: [true, 'Confidence is required.'],
+  min: [
+    CONFIDENCE_LIMITS.MIN,
+    `Confidence cannot be less than ${CONFIDENCE_LIMITS.MIN}.`,
+  ],
+  max: [
+    CONFIDENCE_LIMITS.MAX,
+    `Confidence cannot exceed ${CONFIDENCE_LIMITS.MAX}.`,
+  ],
+},
+timeTaken: {
+  type: Number,
+  required: [true, 'Time taken is required.'],
+  min: [0, 'Time taken cannot be negative.'],
+},
+
+hintLevel: {
+  type: String,
+  required: [true, 'Hint level is required.'],
+  enum: {
+    values: Object.values(HINT_LEVELS),
+    message: 'Invalid hint level.',
+  },
+  default: HINT_LEVELS.NONE,
+},
+
+attemptType: {
+  type: String,
+  required: [true, 'Attempt type is required.'],
+  enum: {
+    values: Object.values(ATTEMPT_TYPES),
+    message: 'Invalid attempt type.',
+  },
+  default: ATTEMPT_TYPES.REVISION,
+},
+
     notes: {
       type: String,
       trim: true,
-      maxlength: [
-        REVISION_LIMITS.NOTE_MAX_LENGTH,
-        `Notes must be at most ${REVISION_LIMITS.NOTE_MAX_LENGTH} characters.`,
-      ],
+      maxlength: [1000, 'Notes cannot exceed 1000 characters.'],
+      default: '',
     },
-    feedback: {
-      type: String,
-      trim: true,
-      maxlength: [
-        REVISION_LIMITS.FEEDBACK_MAX_LENGTH,
-        `Feedback must be at most ${REVISION_LIMITS.FEEDBACK_MAX_LENGTH} characters.`,
-      ],
-    },
-    completedAt: {
-      type: Date,
-      required: [true, 'Revision completion date is required.'],
+
+    isCooldownMerge: {
+      type: Boolean,
+      default: false,
     },
   },
   {
     collection: 'revision_sessions',
     timestamps: true,
+    versionKey: false,
   },
 );
 
-// User timelines and future streak calculations need efficient completion-date queries.
-revisionSessionSchema.index({ userId: 1, completedAt: -1 });
+// ===============================================
+// Indexes
+// ===============================================
 
-// Problem and schedule indexes support future revision histories and retention evidence.
-revisionSessionSchema.index({ problemId: 1 });
-revisionSessionSchema.index({ revisionScheduleId: 1 });
+// User's revision timeline
+revisionSessionSchema.index({ user: 1, createdAt: -1 });
 
-// Session type filtering keeps future manual, scheduled, and AI-recommended analysis cheap.
-revisionSessionSchema.index({ sessionType: 1 });
+// Problem history
+revisionSessionSchema.index({ problem: 1, createdAt: -1 });
+
+// User's history for a specific problem
+revisionSessionSchema.index({ user: 1, problem: 1, createdAt: -1 });
+
+// Analytics
+revisionSessionSchema.index({ attemptType: 1 });
+revisionSessionSchema.index({ result: 1 });
 
 export const RevisionSession = mongoose.model(
   'RevisionSession',
   revisionSessionSchema,
 );
+
 export { revisionSessionSchema };

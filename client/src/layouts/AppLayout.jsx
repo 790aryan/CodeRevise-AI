@@ -1,55 +1,41 @@
 import { Outlet } from 'react-router-dom';
 import Sidebar from '@/components/layout/Sidebar.jsx';
 
-
-
 export function AppLayout() {
-  
-
-
   return (
-    <div className="min-h-screen bg-background text-text">
-      <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen w-full bg-background text-text overflow-hidden font-sans">
+      {/* Sidebar - Fixed width, high visual prominence */}
+      <Sidebar />
 
-
-        <Sidebar />
-
-      
-
-        <div className="flex min-w-0 flex-1 flex-col">
-
-          <header className="border-b border-white/10 bg-background/95 px-5 py-4 backdrop-blur md:px-8">
-
-            <div className="mx-auto flex max-w-6xl items-center justify-between">
-
-              <div>
-
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
-                  Foundation
-                </p>
-
-                <h1 className="mt-1 text-lg font-semibold">
-                  CodeRevise AI Workspace
-                </h1>
-
-              </div>
-
-              <div className="rounded-lg border border-white/10 bg-surface px-4 py-2 text-sm">
-                Phase 1A
-              </div>
-
+      {/* Main Content Area */}
+      <div className="flex flex-1 flex-col min-w-0 bg-background/50">
+        
+        {/* Header - Subtle glassmorphism, sticky positioning */}
+        <header className="sticky top-0 z-30 border-b border-white/5 bg-background/80 backdrop-blur-md px-6 py-4 shadow-sm">
+          <div className="mx-auto flex max-w-7xl items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
+                Workspace
+              </span>
+              <h1 className="text-sm font-semibold tracking-wide text-gray-200">
+                CodeRevise AI
+              </h1>
             </div>
 
-          </header>
-
-          <main className="flex-1 overflow-y-auto px-5 py-6 md:px-8">
-            <div className="mx-auto max-w-6xl">
-              <Outlet />
+            {/* Status Badge */}
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-surface px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+              Phase 1A
             </div>
-          </main>
+          </div>
+        </header>
 
-        </div>
-
+        {/* Scrollable Main Area */}
+        <main className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+          <div className="mx-auto max-w-7xl px-6 py-8">
+            <Outlet />
+          </div>
+        </main>
       </div>
     </div>
   );
