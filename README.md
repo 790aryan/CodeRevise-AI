@@ -348,7 +348,7 @@ VITE_API_URL=http://localhost:5000/api/v1
 
 # 📷 Screenshots
 
-> Add screenshots here
+> comming soon ... 
 
 - Landing Page
 
@@ -416,7 +416,7 @@ https://github.com/790aryan
 
 LinkedIn
 
-(Add LinkedIn Here)
+(www.linkedin.com/in/aryan-gupta-58543b376)
 
 ---
 
